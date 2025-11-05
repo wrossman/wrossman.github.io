@@ -1,8 +1,8 @@
-title: My Jekyll Site
+title: Bill Rossman Personal Site
 description: >- 
-  A simple site built with Jekyll and hosted on GitHub Pages.
+  My personal/resume page on Github Pages
 remote_theme: pages-themes/slate@v0.2.0
 plugins:
-- jekyll-remote-theme # add this line to the plugins list if you already have one
-baseurl: "" # leave empty unless your site is in a subpath
+- jekyll-remote-theme
+baseurl: ""
 url: "https://wrossman.github.io"
