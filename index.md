@@ -48,7 +48,7 @@ Completed a three‑year vocational program aligned with CompTIA A+, Network+, a
 - CompTIA Security+  
 - CompTIA Network+  
 - CompTIA Cloud+  
-- Red Hat Certified System Administrator (RHCSA) — *Oct 2025*
+- Red Hat Certified System Administrator (RHCSA)
 
 
 
