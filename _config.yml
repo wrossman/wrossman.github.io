@@ -1,0 +1,6 @@
+title: My Jekyll Site
+description: >- 
+  A simple site built with Jekyll and hosted on GitHub Pages.
+theme: slate
+baseurl: "" # leave empty unless your site is in a subpath
+url: "https://wrossman.github.io"
