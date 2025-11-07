@@ -5,8 +5,8 @@
 
 <div style="font-family: Georgia, 'Times New Roman', serif; line-height: 1.0; text-align: center;">
   <p>Seattle, WA</p>
-  <p><a href="tel:+12158038063" style="color: inherit; text-decoration: underline;">215-803-8063</a></p>
-  <p><a href="mailto:william.m.rossman@gmail.com" style="color: inherit; text-decoration: underline;">william.m.rossman@gmail.com</a></p>
+  <!--<p><a href="tel:+12158038063" style="color: inherit; text-decoration: underline;">215-803-8063</a></p>
+  <p><a href="mailto:william.m.rossman@gmail.com" style="color: inherit; text-decoration: underline;">william.m.rossman@gmail.com</a></p>-->
 </div>
 
 ## 👨🏼‍💻 Career Profile
