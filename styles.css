@@ -1930,6 +1930,7 @@ a {
 @media (min-width: 721px) and (max-width: 1100px) {
     .hero {
         --tablet-title-gap: 10px;
+        text-align: center !important;
     }
 
     .hero-visual {
@@ -1937,8 +1938,8 @@ a {
     }
 
     .hero-text {
-        align-items: center;
-        text-align: center;
+        align-items: center !important;
+        text-align: center !important;
         margin-top: 0;
     }
 
@@ -1972,6 +1973,17 @@ a {
         text-align: center;
         font-size: 1.15em;
     }
+
+    .hero-cta-row {
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+        max-width: 620px;
+        align-self: center;
+    }
+
+    .hero-cta-row > * {
+        width: 100% !important;
+    }
 }
 .hero-cta-row {
     display: grid;
@@ -1996,7 +2008,7 @@ a {
         display: flex;
         flex-direction: column;
         align-items: center;
-        text-align: left;
+        text-align: center;
         gap: 12px;
     }
 
@@ -2026,29 +2038,49 @@ a {
 
     .hero-text {
         order: 2;
-        align-items: flex-start;
-        text-align: left;
+        align-items: center;
+        text-align: center;
         width: 100%;
         margin: 6px 0 0;
     }
 
+    .hero-title {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
     .title-line {
         font-size: clamp(1.5rem, 2.5vw + 1rem, 2rem);
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        text-align: center;
+        gap: 4px;
+    }
+
+    .role-rotate {
+        justify-content: center;
+        width: 100%;
+        text-align: center;
     }
 
     .lede {
         font-size: 0.95rem;
         line-height: 1.45;
         margin-bottom: 12px;
+        text-align: center;
     }
 
     .hero-cta-row {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr;
         width: 100%;
+        max-width: 620px;
+        align-self: center;
     }
 
     .hero-cta-row>* {
-        width: auto;
+        width: 100%;
     }
 }
 
@@ -2981,6 +3013,62 @@ body.projects-force-mobile.projects-page .project-section ul {
 
     body.projects-page .project-section .project-header {
         margin-bottom: 10px;
+    }
+}
+
+@media (min-width: 961px) and (max-width: 1100px) {
+    body:not(.projects-page) .hero {
+        text-align: center !important;
+    }
+
+    body:not(.projects-page) .hero-text {
+        align-items: center !important;
+        text-align: center !important;
+        align-self: center;
+    }
+
+    body:not(.projects-page) .hero-title {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    body:not(.projects-page) .title-line {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        text-align: center;
+        gap: 4px;
+    }
+
+    body:not(.projects-page) .role-rotate {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    body:not(.projects-page) .lede {
+        text-align: center;
+    }
+
+    body:not(.projects-page) .hero-cta-row {
+        grid-template-columns: 1fr !important;
+        justify-items: center;
+        width: 100% !important;
+        max-width: 620px;
+        align-self: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    body:not(.projects-page) .hero-cta-row > * {
+        width: 100% !important;
+    }
+
+    body:not(.projects-page) .stat-card.stat-card-current {
+        align-items: center;
+        text-align: center;
     }
 }
 
