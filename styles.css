@@ -560,15 +560,6 @@ a {
     transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
 }
 
-.project-card-link {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-}
-
-.project-card-link .timeline-card {
-    cursor: pointer;
-}
 
 .stat-card-link:hover {
     transform: translateY(-2px);

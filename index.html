@@ -388,28 +388,25 @@
             </section>
 
             <section class="section snap-section project-section" data-project-index="2" id="project-3">
-                <a class="project-card-link" href="https://github.com/wrossman/MSSA_Projects" target="_blank"
-                    rel="noopener noreferrer">
-                    <article class="timeline-card" data-project-link="https://github.com/wrossman/MSSA_Projects">
-                        <div class="project-header">
-                            <span class="pill tone">MSSA Projects</span>
-                        </div>
-                        <h3>Training Portfolio from Microsoft Software and Systems Academy</h3>
-                        <div class="tech-stack">
-                            <span class="tech-item">C#</span>
-                            <span class="tech-item">.NET</span>
-                            <span class="tech-item">Azure OpenAI</span>
-                        </div>
-                        <ul>
-                            <li>Built a collection of console apps and exercises covering loops, conditionals, and string
-                                handling.</li>
-                            <li>Implemented OOP interface demos that cycle through gadgets and trigger behaviors.</li>
-                            <li>Created a mortgage calculator with shared logic and tests for verification.</li>
-                            <li>Experimented with Azure OpenAI chat prompts and text-to-speech output using user secrets.
-                            </li>
-                        </ul>
-                    </article>
-                </a>
+                <article class="timeline-card" data-project-link="https://github.com/wrossman/MSSA_Projects">
+                    <div class="project-header">
+                        <span class="pill tone">MSSA Projects</span>
+                    </div>
+                    <h3>Training Portfolio from Microsoft Software and Systems Academy</h3>
+                    <div class="tech-stack">
+                        <span class="tech-item">C#</span>
+                        <span class="tech-item">.NET</span>
+                        <span class="tech-item">Azure OpenAI</span>
+                    </div>
+                    <ul>
+                        <li>Built a collection of console apps and exercises covering loops, conditionals, and string
+                            handling.</li>
+                        <li>Implemented OOP interface demos that cycle through gadgets and trigger behaviors.</li>
+                        <li>Created a mortgage calculator with shared logic and tests for verification.</li>
+                        <li>Experimented with Azure OpenAI chat prompts and text-to-speech output using user secrets.
+                        </li>
+                    </ul>
+                </article>
             </section>
         </main>
     </div>
@@ -749,6 +746,9 @@
             const isProjectsActive = () => body.classList.contains("projects-page");
             const isProjectsMobile = () =>
                 isMobileList || body.classList.contains("projects-force-mobile");
+            const isProjectsListMode = () =>
+                isProjectsMobile() ||
+                window.matchMedia("(max-height: 880px) and (min-width: 721px)").matches;
 
             const updateProjectsHeightMode = () => {
                 if (!isProjectsActive()) {
@@ -780,6 +780,16 @@
                     updateTitle();
                 }
             };
+
+            projectsView.addEventListener("click", (event) => {
+                if (!isProjectsActive() || !isProjectsListMode()) return;
+                const card = event.target.closest(".project-section .timeline-card");
+                if (!card) return;
+                const link = card.dataset.projectLink;
+                if (!link) return;
+                event.preventDefault();
+                openProjectLink(link);
+            });
 
             let wheelCooldown = false;
             container.addEventListener(
