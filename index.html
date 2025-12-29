@@ -362,7 +362,7 @@
             </section>
 
             <section class="section snap-section project-section" data-project-index="1" id="project-2">
-                <article class="timeline-card">
+                <article class="timeline-card" data-project-link="https://github.com/wrossman/LightSaver-Web-App">
                     <div class="project-header">
                         <span class="pill tone">LightSaver</span>
                     </div>
@@ -409,6 +409,10 @@
                 </article>
             </section>
         </main>
+        <div class="link-preview" aria-hidden="true">
+            <span class="link-preview-label">Project link:</span>
+            <a class="link-preview-url" href="#" target="_blank" rel="noopener noreferrer"></a>
+        </div>
     </div>
 
     <script>
@@ -585,6 +589,9 @@
             const sections = Array.from(projectsView.querySelectorAll(".project-section") || []);
             const deck = projectsView.querySelector(".projects-deck");
             const title = projectsView.querySelector(".projects-fixed-title");
+            const linkPreview = projectsView.querySelector(".link-preview");
+            const linkPreviewUrl = linkPreview?.querySelector(".link-preview-url");
+            const linkPreviewLabel = linkPreview?.querySelector(".link-preview-label");
             if (!container || !sections.length || !deck) return;
 
             const isMobileList = window.matchMedia("(max-width: 720px)").matches;
@@ -602,6 +609,10 @@
             let hoverHandlerCard = null;
             let hoverHandler = null;
             let clickNavTarget = null;
+            let linkPreviewAnchor = null;
+            let linkPreviewClearTimeout = null;
+            const LINK_PREVIEW_FADE_MS = 220;
+            let linkPreviewSwapTimeout = null;
 
             sections.forEach((section, index) => {
                 const card = section.querySelector(".timeline-card");
@@ -624,6 +635,21 @@
                 });
                 deckCards.push(clone);
                 deck.appendChild(clone);
+
+                if (card.dataset.projectLink) {
+                    const showPreview = () => {
+                        if (!isProjectsActive() || !isProjectsListMode()) return;
+                        setLinkPreview(card.dataset.projectLink, card);
+                    };
+                    const hidePreview = () => {
+                        if (!isProjectsActive() || !isProjectsListMode()) return;
+                        setLinkPreview("");
+                    };
+                    card.addEventListener("mouseenter", showPreview);
+                    card.addEventListener("mouseleave", hidePreview);
+                    card.addEventListener("focusin", showPreview);
+                    card.addEventListener("focusout", hidePreview);
+                }
             });
 
             const normalizeIndex = (idx) => ((idx % total) + total) % total;
@@ -634,6 +660,7 @@
                 updateDeck();
                 updateTitle();
                 updateProjectsHeightMode();
+                syncLinkPreview();
             };
 
             const updateDeck = () => {
@@ -689,6 +716,7 @@
                             if (!currentCard.classList.contains("hover-blocked")) {
                                 currentCard.classList.add("is-ready");
                             }
+                            syncLinkPreview();
                             if (hoverHandlerCard && hoverHandler) {
                                 hoverHandlerCard.removeEventListener("transitionend", hoverHandler);
                             }
@@ -706,6 +734,7 @@
                                 if (!currentCard.classList.contains("hover-blocked")) {
                                     currentCard.classList.add("is-ready");
                                 }
+                                syncLinkPreview();
                             }
                             if (hoverHandlerCard && hoverHandler) {
                                 hoverHandlerCard.removeEventListener("transitionend", hoverHandler);
@@ -743,6 +772,103 @@
                 window.open(link, "_blank", "noopener,noreferrer");
             };
 
+            const updateLinkPreviewPosition = (anchorEl) => {
+                if (!linkPreview || !anchorEl) return;
+                if (linkPreview.classList.contains("is-hiding")) return;
+                const anchorRect = anchorEl.getBoundingClientRect();
+                const previewRect = linkPreview.getBoundingClientRect();
+                const viewHeight = window.innerHeight;
+                const minTop = anchorRect.bottom + 8;
+                const maxTop = viewHeight - previewRect.height - 8;
+                let targetTop = (anchorRect.bottom + viewHeight) / 2 - previewRect.height / 2;
+                if (maxTop < minTop) {
+                    targetTop = Math.max(8, maxTop);
+                } else {
+                    targetTop = Math.max(minTop, Math.min(targetTop, maxTop));
+                }
+                linkPreview.style.setProperty("--link-preview-top", `${Math.round(targetTop)}px`);
+                linkPreview.style.setProperty("--link-preview-bottom", "auto");
+            };
+
+            const setLinkPreview = (link, anchorEl) => {
+                if (!linkPreview || !linkPreviewUrl) return;
+                if (!link) {
+                    if (linkPreviewClearTimeout) {
+                        clearTimeout(linkPreviewClearTimeout);
+                        linkPreviewClearTimeout = null;
+                    }
+                    if (linkPreviewSwapTimeout) {
+                        clearTimeout(linkPreviewSwapTimeout);
+                        linkPreviewSwapTimeout = null;
+                    }
+                    const wasVisible = linkPreview.classList.contains("is-visible");
+                    linkPreview.classList.remove("is-visible");
+                    linkPreview.classList.add("is-hiding");
+                    linkPreview.setAttribute("aria-hidden", "true");
+                    const clearPreview = () => {
+                        if (linkPreviewLabel) {
+                            linkPreviewLabel.textContent = "";
+                        }
+                        linkPreviewUrl.textContent = "";
+                        linkPreviewUrl.removeAttribute("href");
+                        linkPreviewUrl.removeAttribute("title");
+                        linkPreviewAnchor = null;
+                        linkPreview.classList.remove("is-hiding");
+                    };
+                    if (wasVisible) {
+                        linkPreviewClearTimeout = setTimeout(clearPreview, LINK_PREVIEW_FADE_MS);
+                    } else {
+                        clearPreview();
+                    }
+                    return;
+                }
+                if (linkPreviewClearTimeout) {
+                    clearTimeout(linkPreviewClearTimeout);
+                    linkPreviewClearTimeout = null;
+                }
+                if (linkPreviewSwapTimeout) {
+                    clearTimeout(linkPreviewSwapTimeout);
+                    linkPreviewSwapTimeout = null;
+                }
+                const currentLink = linkPreviewUrl.textContent;
+                const isVisible = linkPreview.classList.contains("is-visible");
+                if (isVisible && currentLink && currentLink !== link) {
+                    linkPreview.classList.remove("is-visible");
+                    linkPreview.classList.add("is-hiding");
+                    linkPreview.setAttribute("aria-hidden", "true");
+                    if (anchorEl) {
+                        linkPreviewAnchor = anchorEl;
+                    }
+                    linkPreviewSwapTimeout = setTimeout(() => {
+                        linkPreview.classList.remove("is-hiding");
+                        if (linkPreviewLabel) {
+                            linkPreviewLabel.textContent = "Project link:";
+                        }
+                        linkPreviewUrl.textContent = link;
+                        linkPreviewUrl.setAttribute("href", link);
+                        linkPreviewUrl.setAttribute("title", link);
+                        updateLinkPreviewPosition(linkPreviewAnchor);
+                        linkPreview.classList.add("is-visible");
+                        linkPreview.setAttribute("aria-hidden", "false");
+                        linkPreviewSwapTimeout = null;
+                    }, LINK_PREVIEW_FADE_MS);
+                    return;
+                }
+                linkPreview.classList.remove("is-hiding");
+                if (anchorEl) {
+                    linkPreviewAnchor = anchorEl;
+                }
+                if (linkPreviewLabel) {
+                    linkPreviewLabel.textContent = "Project link:";
+                }
+                linkPreviewUrl.textContent = link;
+                linkPreviewUrl.setAttribute("href", link);
+                linkPreviewUrl.setAttribute("title", link);
+                updateLinkPreviewPosition(linkPreviewAnchor);
+                linkPreview.classList.add("is-visible");
+                linkPreview.setAttribute("aria-hidden", "false");
+            };
+
             const isProjectsActive = () => body.classList.contains("projects-page");
             const isProjectsMobile = () =>
                 isMobileList || body.classList.contains("projects-force-mobile");
@@ -750,14 +876,40 @@
                 isProjectsMobile() ||
                 window.matchMedia("(max-height: 880px) and (min-width: 721px)").matches;
 
+            const syncLinkPreview = () => {
+                if (!isProjectsActive()) {
+                    setLinkPreview("");
+                    return;
+                }
+                if (isProjectsListMode()) {
+                    if (linkPreviewAnchor && linkPreviewAnchor.matches(":hover")) {
+                        updateLinkPreviewPosition(linkPreviewAnchor);
+                        return;
+                    }
+                    setLinkPreview("");
+                    return;
+                }
+                const currentCard = deckCards[currentIndex];
+                if (!currentCard) {
+                    return;
+                }
+                if (!currentCard.classList.contains("is-in-view")) {
+                    return;
+                }
+                const link = getProjectLink(currentCard);
+                setLinkPreview(link, currentCard);
+            };
+
             const updateProjectsHeightMode = () => {
                 if (!isProjectsActive()) {
                     body.classList.remove("projects-force-mobile");
+                    syncLinkPreview();
                     return;
                 }
                 if (isMobileList) {
                     body.classList.add("projects-force-mobile");
                     updateTitle();
+                    syncLinkPreview();
                     return;
                 }
                 const wasForced = body.classList.contains("projects-force-mobile");
@@ -766,7 +918,10 @@
                     updateTitle();
                 }
                 const currentCard = deckCards[currentIndex];
-                if (!title || !currentCard) return;
+                if (!title || !currentCard) {
+                    syncLinkPreview();
+                    return;
+                }
                 const titleRect = title.getBoundingClientRect();
                 const cardRect = currentCard.getBoundingClientRect();
                 const overlapTop = titleRect.bottom + 16 >= cardRect.top;
@@ -779,6 +934,7 @@
                 if (wasForced !== forceMobile) {
                     updateTitle();
                 }
+                syncLinkPreview();
             };
 
             projectsView.addEventListener("click", (event) => {
