@@ -388,25 +388,28 @@
             </section>
 
             <section class="section snap-section project-section" data-project-index="2" id="project-3">
-                <article class="timeline-card">
-                    <div class="project-header">
-                        <span class="pill tone">MSSA Projects</span>
-                    </div>
-                    <h3>Training Portfolio from Microsoft Software and Systems Academy</h3>
-                    <div class="tech-stack">
-                        <span class="tech-item">C#</span>
-                        <span class="tech-item">.NET</span>
-                        <span class="tech-item">Azure OpenAI</span>
-                    </div>
-                    <ul>
-                        <li>Built a collection of console apps and exercises covering loops, conditionals, and string
-                            handling.</li>
-                        <li>Implemented OOP interface demos that cycle through gadgets and trigger behaviors.</li>
-                        <li>Created a mortgage calculator with shared logic and tests for verification.</li>
-                        <li>Experimented with Azure OpenAI chat prompts and text-to-speech output using user secrets.
-                        </li>
-                    </ul>
-                </article>
+                <a class="project-card-link" href="https://github.com/wrossman/MSSA_Projects" target="_blank"
+                    rel="noopener noreferrer">
+                    <article class="timeline-card" data-project-link="https://github.com/wrossman/MSSA_Projects">
+                        <div class="project-header">
+                            <span class="pill tone">MSSA Projects</span>
+                        </div>
+                        <h3>Training Portfolio from Microsoft Software and Systems Academy</h3>
+                        <div class="tech-stack">
+                            <span class="tech-item">C#</span>
+                            <span class="tech-item">.NET</span>
+                            <span class="tech-item">Azure OpenAI</span>
+                        </div>
+                        <ul>
+                            <li>Built a collection of console apps and exercises covering loops, conditionals, and string
+                                handling.</li>
+                            <li>Implemented OOP interface demos that cycle through gadgets and trigger behaviors.</li>
+                            <li>Created a mortgage calculator with shared logic and tests for verification.</li>
+                            <li>Experimented with Azure OpenAI chat prompts and text-to-speech output using user secrets.
+                            </li>
+                        </ul>
+                    </article>
+                </a>
             </section>
         </main>
     </div>
@@ -437,12 +440,13 @@
         (function () {
             const container = document.querySelector(".main-view .snap-page");
             const sections = Array.from(container?.querySelectorAll(".snap-section") || []);
+            const body = document.body;
             const up = document.querySelector(".snap-arrow-up");
             const down = document.querySelector(".snap-arrow-down");
-            const hero = document.querySelector(".hero");
-            const portrait = document.querySelector(".portrait-frame");
-            const greeting = document.querySelector(".hero-greeting");
             const hintDesktop = document.querySelector(".scroll-hint-desktop");
+            const hero = document.querySelector(".hero");
+            const greeting = document.querySelector(".hero-greeting");
+            const titleLine = document.querySelector(".hero .title-line");
             if (!container || !sections.length || !up || !down) return;
             let currentIndex = 0;
 
@@ -466,6 +470,55 @@
                 if (hintDesktop) {
                     hintDesktop.classList.toggle("is-hidden", currentIndex !== 0);
                 }
+            };
+
+            const isDesktopLayout = () => window.matchMedia("(min-width: 1101px)").matches;
+
+            const isSectionOverflowing = () => {
+                const viewportHeight = window.innerHeight;
+                return sections.some((section) => {
+                    const scrollHeight = Math.ceil(section.scrollHeight);
+                    const clientHeight = Math.ceil(section.clientHeight);
+                    return scrollHeight > clientHeight + 1 || scrollHeight > viewportHeight + 1;
+                });
+            };
+
+            const isGreetingClipped = () => {
+                if (!hero || !greeting || !titleLine) return false;
+                const titleRect = titleLine.getBoundingClientRect();
+                const greetingRect = greeting.getBoundingClientRect();
+                return greetingRect.bottom + 8 > titleRect.top;
+            };
+
+            const updateHeightMode = () => {
+                if (body.classList.contains("projects-page")) return;
+                const forceMobile = isSectionOverflowing() || isGreetingClipped();
+                body.classList.toggle("force-mobile", forceMobile);
+            };
+
+            const updateGreetingPosition = () => {
+                if (!hero || !greeting || !titleLine) return;
+                if (!isDesktopLayout() || body.classList.contains("force-mobile")) {
+                    hero.style.removeProperty("--hero-greeting-top");
+                    return;
+                }
+                const heroRect = hero.getBoundingClientRect();
+                const titleRect = titleLine.getBoundingClientRect();
+                const greetingRect = greeting.getBoundingClientRect();
+                const targetCenter = titleRect.top / 2;
+                const maxTop = titleRect.top - heroRect.top - greetingRect.height - 8;
+                let top = targetCenter - heroRect.top - greetingRect.height / 2;
+                if (Number.isFinite(maxTop)) {
+                    top = Math.min(top, maxTop);
+                }
+                top = Math.max(0, top);
+                hero.style.setProperty("--hero-greeting-top", `${Math.round(top)}px`);
+            };
+
+            const syncLayout = () => {
+                updateGreetingPosition();
+                updateHeightMode();
+                updateGreetingPosition();
             };
 
             up.addEventListener("click", () => scrollToIndex(currentIndex - 1));
@@ -499,18 +552,10 @@
 
             sections.forEach((section) => observer.observe(section));
             updateArrows();
+            syncLayout();
+            window.addEventListener("resize", () => requestAnimationFrame(syncLayout));
+            document.fonts?.ready?.then(() => syncLayout());
 
-            const updateGreeting = () => {
-                if (!hero || !portrait || !greeting) return;
-                const heroRect = hero.getBoundingClientRect();
-                const portraitRect = portrait.getBoundingClientRect();
-                const relativeTop = portraitRect.top - heroRect.top;
-                const offset = Math.max(0, relativeTop / 2 - 50);
-                greeting.style.top = `${offset}px`;
-            };
-
-            window.addEventListener("resize", updateGreeting);
-            updateGreeting();
         })();
 
         (function () {
@@ -525,6 +570,7 @@
                 body.classList.toggle("projects-page", isVisible);
                 mainView.setAttribute("aria-hidden", String(isVisible));
                 projectsView.setAttribute("aria-hidden", String(!isVisible));
+                window.dispatchEvent(new Event("projects:layout"));
             };
 
             showProjects.addEventListener("click", (event) => {
@@ -545,11 +591,20 @@
             if (!container || !sections.length || !deck) return;
 
             const isMobileList = window.matchMedia("(max-width: 720px)").matches;
-            const enableSwipe = window.matchMedia("(max-width: 1100px)").matches;
             const total = sections.length;
             let virtualIndex = 0;
             let currentIndex = 0;
             const deckCards = [];
+            let suppressDeckClick = false;
+            let pointerStartX = 0;
+            let pointerStartY = 0;
+            let pointerActive = false;
+            let pointerDownCard = null;
+            let highlightTimeout = null;
+            let lastCurrentIndex = null;
+            let hoverHandlerCard = null;
+            let hoverHandler = null;
+            let clickNavTarget = null;
 
             sections.forEach((section, index) => {
                 const card = section.querySelector(".timeline-card");
@@ -557,6 +612,19 @@
                 const clone = card.cloneNode(true);
                 clone.classList.add("deck-card");
                 clone.dataset.deckIndex = index;
+                if (card.dataset.projectLink) {
+                    clone.dataset.projectLink = card.dataset.projectLink;
+                }
+                clone.addEventListener("mouseenter", () => {
+                    if (!clone.classList.contains("is-current")) return;
+                    if (clone.classList.contains("hover-blocked")) return;
+                    if (!clone.classList.contains("is-in-view")) return;
+                    clone.classList.add("is-ready");
+                });
+                clone.addEventListener("mouseleave", () => {
+                    if (!clone.classList.contains("is-current")) return;
+                    clone.classList.remove("hover-blocked");
+                });
                 deckCards.push(clone);
                 deck.appendChild(clone);
             });
@@ -568,6 +636,7 @@
                 currentIndex = normalizeIndex(virtualIndex);
                 updateDeck();
                 updateTitle();
+                updateProjectsHeightMode();
             };
 
             const updateDeck = () => {
@@ -596,25 +665,134 @@
                         card.classList.add("is-far");
                     }
                 });
+
+                if (currentIndex !== lastCurrentIndex) {
+                    if (highlightTimeout) {
+                        clearTimeout(highlightTimeout);
+                        highlightTimeout = null;
+                    }
+                    if (hoverHandlerCard && hoverHandler) {
+                        hoverHandlerCard.removeEventListener("transitionend", hoverHandler);
+                        hoverHandlerCard = null;
+                        hoverHandler = null;
+                    }
+                    const isClickNav = clickNavTarget === currentIndex;
+                    clickNavTarget = null;
+                    deckCards.forEach((card) => card.classList.remove("is-ready", "is-in-view", "hover-blocked"));
+                    const currentCard = deckCards[currentIndex];
+                    if (currentCard) {
+                        if (isClickNav) {
+                            currentCard.classList.add("hover-blocked");
+                        }
+                        hoverHandlerCard = currentCard;
+                        hoverHandler = (event) => {
+                            if (event.propertyName !== "transform") return;
+                            if (deckCards[currentIndex] !== currentCard) return;
+                            currentCard.classList.add("is-in-view");
+                            if (!currentCard.classList.contains("hover-blocked")) {
+                                currentCard.classList.add("is-ready");
+                            }
+                            if (hoverHandlerCard && hoverHandler) {
+                                hoverHandlerCard.removeEventListener("transitionend", hoverHandler);
+                            }
+                            hoverHandlerCard = null;
+                            hoverHandler = null;
+                            if (highlightTimeout) {
+                                clearTimeout(highlightTimeout);
+                                highlightTimeout = null;
+                            }
+                        };
+                        currentCard.addEventListener("transitionend", hoverHandler);
+                        highlightTimeout = setTimeout(() => {
+                            if (deckCards[currentIndex] === currentCard) {
+                                currentCard.classList.add("is-in-view");
+                                if (!currentCard.classList.contains("hover-blocked")) {
+                                    currentCard.classList.add("is-ready");
+                                }
+                            }
+                            if (hoverHandlerCard && hoverHandler) {
+                                hoverHandlerCard.removeEventListener("transitionend", hoverHandler);
+                            }
+                            hoverHandlerCard = null;
+                            hoverHandler = null;
+                            highlightTimeout = null;
+                        }, 320);
+                    }
+                    lastCurrentIndex = currentIndex;
+                }
             };
 
             const updateTitle = () => {
                 if (!title) return;
+                if (body.classList.contains("projects-force-mobile")) {
+                    title.style.removeProperty("top");
+                    return;
+                }
                 const offset = Math.max(18, window.innerHeight * 0.18);
                 title.style.top = `${offset}px`;
             };
 
+            const getProjectLink = (cardEl) => {
+                if (!cardEl) return "";
+                if (cardEl.dataset.projectLink) return cardEl.dataset.projectLink;
+                const idx = Number(cardEl.dataset.deckIndex);
+                if (Number.isNaN(idx)) return "";
+                const sourceCard = sections[idx]?.querySelector(".timeline-card");
+                return sourceCard?.dataset.projectLink || "";
+            };
+
+            const openProjectLink = (link) => {
+                if (!link) return;
+                window.open(link, "_blank", "noopener,noreferrer");
+            };
+
             const isProjectsActive = () => body.classList.contains("projects-page");
+            const isProjectsMobile = () =>
+                isMobileList || body.classList.contains("projects-force-mobile");
+
+            const updateProjectsHeightMode = () => {
+                if (!isProjectsActive()) {
+                    body.classList.remove("projects-force-mobile");
+                    return;
+                }
+                if (isMobileList) {
+                    body.classList.add("projects-force-mobile");
+                    updateTitle();
+                    return;
+                }
+                const wasForced = body.classList.contains("projects-force-mobile");
+                if (wasForced) {
+                    body.classList.remove("projects-force-mobile");
+                    updateTitle();
+                }
+                const currentCard = deckCards[currentIndex];
+                if (!title || !currentCard) return;
+                const titleRect = title.getBoundingClientRect();
+                const cardRect = currentCard.getBoundingClientRect();
+                const overlapTop = titleRect.bottom + 16 >= cardRect.top;
+                const clippedBottom = cardRect.bottom > window.innerHeight - 16;
+                const tooTall = cardRect.height > window.innerHeight - 80;
+                const heightTooShort = window.innerHeight < 880;
+                const forceMobile =
+                    heightTooShort || overlapTop || clippedBottom || tooTall || window.innerHeight < 560;
+                body.classList.toggle("projects-force-mobile", forceMobile);
+                if (wasForced !== forceMobile) {
+                    updateTitle();
+                }
+            };
 
             let wheelCooldown = false;
             container.addEventListener(
                 "wheel",
                 (event) => {
-                    if (!isProjectsActive() || isMobileList) return;
+                    if (!isProjectsActive() || isProjectsMobile()) return;
                     if (wheelCooldown) return;
-                    if (Math.abs(event.deltaY) < 60) return;
+                    const absX = Math.abs(event.deltaX);
+                    const absY = Math.abs(event.deltaY);
+                    const axisDelta = absX > absY ? event.deltaX : event.deltaY;
+                    if (Math.abs(axisDelta) < 60) return;
                     event.preventDefault();
-                    const direction = event.deltaY > 0 ? 1 : -1;
+                    const direction = axisDelta > 0 ? 1 : -1;
                     setIndex(virtualIndex + direction);
                     wheelCooldown = true;
                     setTimeout(() => (wheelCooldown = false), 180);
@@ -622,38 +800,82 @@
                 { passive: false }
             );
 
-            if (enableSwipe) {
-                let touchStartX = 0;
-                let touchStartY = 0;
-                container.addEventListener("touchstart", (event) => {
-                    const touch = event.touches[0];
-                    touchStartX = touch.clientX;
-                    touchStartY = touch.clientY;
-                }, { passive: true });
-                container.addEventListener("touchend", (event) => {
-                    if (!isProjectsActive() || isMobileList) return;
-                    const touch = event.changedTouches[0];
-                    const deltaX = touch.clientX - touchStartX;
-                    const deltaY = touch.clientY - touchStartY;
-                    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+            container.addEventListener("pointerdown", (event) => {
+                if (!isProjectsActive() || isProjectsMobile()) return;
+                if (event.pointerType === "mouse" && event.button !== 0) return;
+                pointerActive = true;
+                pointerStartX = event.clientX;
+                pointerStartY = event.clientY;
+                pointerDownCard = event.target.closest(".deck-card");
+                suppressDeckClick = false;
+                if (event.pointerType !== "mouse") {
+                    container.setPointerCapture(event.pointerId);
+                }
+            });
+
+            const finishPointer = (event) => {
+                if (!pointerActive) return;
+                pointerActive = false;
+                const deltaX = event.clientX - pointerStartX;
+                const deltaY = event.clientY - pointerStartY;
+                const absX = Math.abs(deltaX);
+                const absY = Math.abs(deltaY);
+                if (absX >= 50 && absX >= absY) {
                     const direction = deltaX < 0 ? 1 : -1;
                     setIndex(virtualIndex + direction);
-                }, { passive: true });
-            }
+                    suppressDeckClick = true;
+                    pointerDownCard = null;
+                    return;
+                }
+                if (!pointerDownCard) return;
+                const idx = Number(pointerDownCard.dataset.deckIndex);
+                if (Number.isNaN(idx)) return;
+                const projectLink = getProjectLink(pointerDownCard);
+                if (pointerDownCard.classList.contains("is-current") && projectLink) {
+                    openProjectLink(projectLink);
+                    suppressDeckClick = true;
+                    pointerDownCard = null;
+                    return;
+                }
+                clickNavTarget = idx;
+                setIndex(virtualIndex + (idx - currentIndex));
+                suppressDeckClick = true;
+                pointerDownCard = null;
+            };
+
+            container.addEventListener("pointerup", finishPointer);
+            container.addEventListener("pointercancel", finishPointer);
 
             deck.addEventListener("click", (event) => {
-                if (!isProjectsActive() || isMobileList) return;
+                if (!isProjectsActive() || isProjectsMobile()) return;
+                if (suppressDeckClick) {
+                    suppressDeckClick = false;
+                    return;
+                }
                 const card = event.target.closest(".deck-card");
                 if (!card) return;
+                const projectLink = getProjectLink(card);
+                if (card.classList.contains("is-current") && projectLink) {
+                    event.preventDefault();
+                    openProjectLink(projectLink);
+                    return;
+                }
                 const idx = Number(card.dataset.deckIndex);
                 if (Number.isNaN(idx)) return;
                 const delta = idx - currentIndex;
+                clickNavTarget = idx;
                 setIndex(virtualIndex + delta);
             });
 
             setIndex(0);
             updateTitle();
+            updateProjectsHeightMode();
             window.addEventListener("resize", updateTitle);
+            window.addEventListener("resize", updateProjectsHeightMode);
+            window.addEventListener("projects:layout", () => {
+                updateTitle();
+                updateProjectsHeightMode();
+            });
         })();
     </script>
 </body>

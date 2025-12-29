@@ -366,6 +366,7 @@ a {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    top: var(--hero-greeting-top, 0px);
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -557,6 +558,16 @@ a {
     color: inherit;
     display: block;
     transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.project-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.project-card-link .timeline-card {
+    cursor: pointer;
 }
 
 .stat-card-link:hover {
@@ -1450,10 +1461,6 @@ a {
 
 @media (max-width: 1100px) {
     .projects-scroll-hint .hint-scroll {
-        display: none;
-    }
-
-    .projects-scroll-hint .hint-swipe {
         display: inline;
     }
 }
@@ -1486,6 +1493,8 @@ a {
     inset: 0;
     display: grid;
     place-items: center;
+    padding-top: clamp(120px, 18vh, 220px);
+    padding-bottom: 40px;
     pointer-events: auto;
     perspective: 1200px;
     z-index: 1;
@@ -1499,7 +1508,7 @@ a {
     transform: translateX(0) scale(0.84);
     transform-origin: center;
     opacity: 0;
-    transition: transform 260ms ease, opacity 260ms ease, filter 260ms ease;
+    transition: transform 260ms ease, opacity 260ms ease, filter 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
     box-shadow: var(--shadow);
     background: #141922;
     border: 1px solid var(--border);
@@ -1515,6 +1524,16 @@ a {
     transform: translateX(0) scale(1);
     z-index: 5;
     filter: none;
+}
+
+.projects-deck .deck-card.is-current {
+    cursor: pointer;
+}
+
+.projects-deck .deck-card.is-current.is-ready:hover {
+    transform: translateX(0) translateY(-2px) scale(1.005);
+    box-shadow: 0 12px 28px rgba(124, 178, 255, 0.16), var(--shadow);
+    border-color: rgba(124, 178, 255, 0.35);
 }
 
 .projects-deck .deck-card.is-prev {
@@ -2639,6 +2658,385 @@ a {
     body:not(.projects-page) .snap-arrows {
         display: none !important;
     }
+}
+
+body.force-mobile:not(.projects-page) .snap-page {
+    height: auto;
+    min-height: auto;
+    overflow-y: visible;
+    scroll-snap-type: none;
+}
+
+body.force-mobile:not(.projects-page) .snap-section {
+    min-height: auto;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+    padding: 24px 0;
+}
+
+body.force-mobile:not(.projects-page) .snap-section.hero {
+    min-height: 100vh;
+    padding: 0;
+}
+
+body.force-mobile:not(.projects-page) .snap-arrows {
+    display: none;
+}
+
+body.force-mobile:not(.projects-page) {
+    padding-bottom: 48px;
+}
+
+body.force-mobile:not(.projects-page) .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+    gap: 0;
+    justify-content: space-evenly;
+}
+
+body.force-mobile:not(.projects-page) .hero-greeting {
+    order: 0;
+    position: static;
+    transform: none;
+    margin: 0;
+    margin-top: 12px;
+}
+
+body.force-mobile:not(.projects-page) .hero-visual {
+    order: 1;
+    align-self: center;
+    margin-top: 6px;
+    margin-bottom: 16px;
+}
+
+body.force-mobile:not(.projects-page) .hero-text {
+    order: 2;
+    display: contents;
+    width: 100%;
+    margin-top: 8px;
+}
+
+body.force-mobile:not(.projects-page) .hero-cta-row {
+    order: 4;
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 620px;
+    align-self: center;
+}
+
+body.force-mobile:not(.projects-page) .hero-cta-row > * {
+    width: 100%;
+}
+
+body.projects-force-mobile.projects-page .snap-page {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: visible;
+    scroll-snap-type: none;
+}
+
+body.projects-force-mobile.projects-page {
+    overflow: auto;
+}
+
+body.projects-force-mobile.projects-page .main-view {
+    display: none;
+}
+
+body.projects-force-mobile.projects-page .projects-view {
+    position: relative;
+    inset: auto;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+}
+
+body.projects-force-mobile.projects-page .snap-section {
+    min-height: auto;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+    padding: 0 0;
+}
+
+body.projects-force-mobile.projects-page .snap-arrows {
+    display: none;
+}
+
+body.projects-force-mobile.projects-page .projects-deck {
+    display: none;
+}
+
+body.projects-force-mobile.projects-page .project-section .timeline-card {
+    opacity: 1;
+    pointer-events: auto;
+    margin-top: 0;
+    margin-bottom: 24px;
+}
+
+body.projects-force-mobile.projects-page .projects-fixed-title {
+    position: static;
+    transform: none;
+    left: auto;
+    right: auto;
+    top: auto;
+    text-align: center;
+    margin: 60px 0 16px;
+    pointer-events: auto;
+}
+
+body.projects-force-mobile.projects-page .projects-scroll-hint {
+    display: none;
+}
+
+body.projects-force-mobile.projects-page .project-section .timeline-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 32px 20px 24px;
+}
+
+body.projects-force-mobile.projects-page .project-section .project-header {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+body.projects-force-mobile.projects-page .project-section .project-header .pill {
+    width: 100%;
+    text-align: center;
+    display: inline-flex;
+    justify-content: center;
+}
+
+body.projects-force-mobile.projects-page .project-section .timeline-card h3 {
+    width: 100%;
+    text-align: center;
+    align-self: center;
+}
+
+body.projects-force-mobile.projects-page .project-section h3 {
+    width: 100%;
+    text-align: center;
+}
+
+body.projects-force-mobile.projects-page .project-section .tech-stack {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    gap: 0;
+}
+
+body.projects-force-mobile.projects-page .project-section .tech-stack .tech-item:not(:first-child)::before {
+    margin: 0 6px;
+    padding: 0;
+}
+
+body.projects-force-mobile.projects-page .project-section ul {
+    width: 100%;
+    text-align: left;
+    align-self: stretch;
+}
+
+body.projects-force-mobile.projects-page .project-section .project-header .pill {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+body.projects-force-mobile.projects-page .project-section h3 {
+    font-size: 1.15rem;
+}
+
+body.projects-force-mobile.projects-page .project-section .tech-stack {
+    font-size: 1rem;
+}
+
+body.projects-force-mobile.projects-page .project-section h3,
+body.projects-force-mobile.projects-page .project-section .tech-stack {
+    margin-top: 6px;
+}
+
+body.projects-force-mobile.projects-page .project-section .project-header {
+    margin-bottom: 10px;
+}
+
+body.projects-force-mobile.projects-page .project-section ul {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+@media (max-height: 880px) and (min-width: 721px) {
+    body.projects-page {
+        overflow: auto;
+    }
+
+    body.projects-page .main-view {
+        display: none;
+    }
+
+    body.projects-page .projects-view {
+        position: relative;
+        inset: auto;
+        transform: none;
+        opacity: 1;
+        pointer-events: auto;
+        visibility: visible;
+    }
+
+    body.projects-page .snap-page {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: visible;
+        scroll-snap-type: none;
+    }
+
+    body.projects-page .snap-section {
+        min-height: auto;
+        scroll-snap-align: none;
+        scroll-snap-stop: normal;
+        padding: 0 0;
+    }
+
+    body.projects-page .snap-arrows {
+        display: none;
+    }
+
+    body.projects-page .projects-deck {
+        display: none;
+    }
+
+    body.projects-page .project-section .timeline-card {
+        opacity: 1;
+        pointer-events: auto;
+        margin-top: 0;
+        margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        padding: 32px 20px 24px;
+    }
+
+    body.projects-page .projects-fixed-title {
+        position: static;
+        transform: none;
+        left: auto;
+        right: auto;
+        top: auto;
+        text-align: center;
+        margin: 60px 0 16px;
+        pointer-events: auto;
+    }
+
+    body.projects-page .projects-scroll-hint {
+        display: none;
+    }
+
+    body.projects-page .project-section .project-header {
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+
+    body.projects-page .project-section .project-header .pill {
+        width: 100%;
+        text-align: center;
+        display: inline-flex;
+        justify-content: center;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+    body.projects-page .project-section .timeline-card h3 {
+        width: 100%;
+        text-align: center;
+        align-self: center;
+        font-size: 1.15rem;
+    }
+
+    body.projects-page .project-section h3 {
+        width: 100%;
+        text-align: center;
+    }
+
+    body.projects-page .project-section .tech-stack {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+        gap: 0;
+        font-size: 1rem;
+    }
+
+    body.projects-page .project-section .tech-stack .tech-item:not(:first-child)::before {
+        margin: 0 6px;
+        padding: 0;
+    }
+
+    body.projects-page .project-section ul {
+        width: 100%;
+        text-align: left;
+        align-self: stretch;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    body.projects-page .project-section h3,
+    body.projects-page .project-section .tech-stack {
+        margin-top: 6px;
+    }
+
+    body.projects-page .project-section .project-header {
+        margin-bottom: 10px;
+    }
+}
+
+body.force-mobile:not(.projects-page) .hero-title {
+    order: 2;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    max-width: 620px;
+    align-self: center;
+}
+
+body.force-mobile:not(.projects-page) .title-line {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    text-align: center;
+}
+
+body.force-mobile:not(.projects-page) .title-prefix {
+    width: 100%;
+    text-align: center;
+    text-transform: lowercase;
+    font-size: 0.9em;
+    color: var(--muted);
+}
+
+body.force-mobile:not(.projects-page) .role-rotate {
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    font-size: 1.05em;
+}
+
+body.force-mobile:not(.projects-page) .lede {
+    order: 3;
+    width: 100%;
+    max-width: 620px;
+    align-self: center;
+    text-align: center;
+}
+
+body.force-mobile:not(.projects-page) .scroll-hint {
+    display: flex;
+    order: 5;
+    margin-top: 4px;
 }
 
 /* Ensure mobile projects bullet sizing wins over broader breakpoints */
