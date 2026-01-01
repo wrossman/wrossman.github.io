@@ -1507,8 +1507,13 @@ a {
     max-width: min(680px, 70vw);
 }
 
+body.projects-force-mobile.projects-page .link-preview {
+    display: none;
+}
+
 @media (max-width: 720px) {
     .link-preview {
+        display: none;
         bottom: var(--link-preview-bottom, 10px);
         font-size: 0.85rem;
         padding: 8px 12px;

@@ -576,9 +576,19 @@
                 window.dispatchEvent(new Event("projects:layout"));
             };
 
+            const resetProjectsScroll = () => {
+                const projectsSnap = projectsView.querySelector(".projects-snap");
+                if (projectsSnap) {
+                    projectsSnap.scrollTo({ top: 0, left: 0, behavior: "auto" });
+                }
+                window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            };
+
             showProjects.addEventListener("click", (event) => {
                 event.preventDefault();
                 setProjectsVisible(true);
+                resetProjectsScroll();
+                requestAnimationFrame(resetProjectsScroll);
             });
 
             hideProjects.addEventListener("click", (event) => {
